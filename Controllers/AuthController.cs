@@ -1,24 +1,20 @@
-using System.Data;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using UniSyncApi.Dtos.Auth;
-using UniSyncApi.Repositories.Interfaces;
-using UniSyncApi.Utilities;
+using UniSyncApi.Services.Interfaces;
 
 namespace UniSyncApi.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IAccountRepository accountRepository) : ControllerBase
+public class AuthController(IAccountService accountService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("Register")]
     public IActionResult Register(AccountRegistrationDto account)
     {
-        accountRepository.Register(account);
+        accountService.Register(account);
         return Ok();
     }
 

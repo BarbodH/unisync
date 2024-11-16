@@ -8,30 +8,19 @@ using UniSyncApi.Utilities;
 
 namespace UniSyncApi.Repositories.Implementations;
 
-public class AccountRepository(IConfiguration config, AuthUtil authUtil) : IAccountRepository
+public class AccountRepository(IConfiguration config) : IAccountRepository
 {
     private readonly IDbConnection _dapper = new SqlConnection(config.GetConnectionString("DefaultConnection"));
 
-    public Task Register(AccountRegistrationDto account)
+    public bool DoesEmailExist(string email)
     {
-        // Ensure that password and password confirmation match
-        if (account.Password != account.PasswordConfirm) throw new Exception("Passwords do not match!");
+        var command = $"SELECT Email FROM Auth.Account WHERE Email = '{email}';";
+        var existingUsers = _dapper.Query<string>(command);
+        return existingUsers.Any();
+    }
 
-        // Ensure that the email does not already exist in the database
-        string command = $"SELECT Email FROM Auth.Account WHERE Email = '{account.Email}';";
-        IEnumerable<string> existingUsers = _dapper.Query<string>(command);
-        if (existingUsers.Count() > 0) throw new Exception("User with this email already exists!");
-
-        // Register the new user and hash their password
-        byte[] passwordSalt = new byte[128 / 8];
-        using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-        {
-            rng.GetNonZeroBytes(passwordSalt);
-        }
-
-        byte[] passwordHash = authUtil.GetPasswordHash(account.Password, passwordSalt);
-
-        // Generate the SQL command required for registering the user
+    public int RegisterCredentials(AccountRegistrationDto account, byte[] passwordHash, byte[] passwordSalt)
+    {
         string sqlCommand = @"
                 INSERT INTO Auth.Credentials (
                     Email,
@@ -44,18 +33,17 @@ public class AccountRepository(IConfiguration config, AuthUtil authUtil) : IAcco
                 );
             ";
 
-        var rowsAffected = _dapper.Execute(sqlCommand, new
+        return _dapper.Execute(sqlCommand, new
         {
             Email = account.Email,
             PasswordHash = passwordHash,
             PasswordSalt = passwordSalt
         });
+    }
 
-        if (rowsAffected == 0) throw new Exception("Failed to Register User!");
-
-        // Add the newly registered user to the users table
-        // By default, the Active properly is set to 1 (true)
-        string sqlUpdateUsers = $@"
+    public int RegisterAccount(AccountRegistrationDto account)
+    {
+        var sqlUpdateUsers = @"
                 INSERT INTO Auth.Account (
                     Role,
                     FirstName,
@@ -68,18 +56,16 @@ public class AccountRepository(IConfiguration config, AuthUtil authUtil) : IAcco
                     @Email
                 );
             ";
-        
-        var rowsAffected2 = _dapper.Execute(sqlUpdateUsers, new
+
+        return _dapper.Execute(sqlUpdateUsers, new
         {
-            Role = 0,
+            account.Role,
             account.FirstName,
             account.LastName,
             account.Email
         });
-        
-        if (rowsAffected2 == 0) throw new Exception("Failed to Add User");
-        return Task.CompletedTask;
     }
+
 
     public Task<bool> Login(AccountLoginDto account)
     {
