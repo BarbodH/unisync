@@ -1,9 +1,12 @@
+using System.Globalization;
+using UniSyncApi.Exceptions;
 using UniSyncApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
@@ -24,6 +27,8 @@ else
 {
     app.UseHttpsRedirection();
 }
+
+app.UseExceptionHandler(_ => { });
 
 app.UseHttpsRedirection();
 
