@@ -1,4 +1,5 @@
 using UniSyncApi.Dtos;
+using UniSyncApi.Exceptions;
 using UniSyncApi.Repositories.Interfaces;
 using UniSyncApi.Services.Interfaces;
 
@@ -10,18 +11,18 @@ public class StudentService(IStudentRepository studentRepository) : IStudentServ
     {
         if (studentRepository.IsDuplicate(student.Email))
         {
-            throw new Exception("Duplicate email.");
+            throw new DuplicateResourceException("student", "email");
         }
 
         var programId = studentRepository.GetProgramId(student.Program);
         if (programId == null)
         {
-            throw new Exception("Program not found.");
+            throw new DuplicateResourceException("program", "id");
         }
 
         if (studentRepository.Create(student, programId.Value) == 0)
         {
-            throw new Exception("Could not create student.");
+            throw new ResourceCreationException("student");
         }
         
         return Task.CompletedTask;

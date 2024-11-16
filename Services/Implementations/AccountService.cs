@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using UniSyncApi.Dtos.Auth;
+using UniSyncApi.Exceptions;
 using UniSyncApi.Repositories.Interfaces;
 using UniSyncApi.Services.Interfaces;
 using UniSyncApi.Utilities;
@@ -12,12 +13,12 @@ public class AccountService(AuthUtil authUtil, IAccountRepository accountReposit
     {
         if (account.Password != account.PasswordConfirm)
         {
-            throw new Exception("Passwords do not match!");
+            throw new InvalidFieldException("user", "password confirm");
         }
 
         if (accountRepository.DoesEmailExist(account.Email))
         {
-            throw new Exception("User with this email already exists!");
+            throw new DuplicateResourceException("user", "email");
         }
 
         var passwordSalt = new byte[128 / 8];
@@ -30,12 +31,12 @@ public class AccountService(AuthUtil authUtil, IAccountRepository accountReposit
 
         if (accountRepository.RegisterCredentials(account, passwordHash, passwordSalt) == 0)
         {
-            throw new Exception("Failed to Register User!");
+            throw new ResourceCreationException("credentials");
         }
 
         if (accountRepository.RegisterAccount(account) == 0)
         {
-            throw new Exception("Failed to Add User");
+            throw new ResourceCreationException("account");
         }
 
         return Task.CompletedTask;
