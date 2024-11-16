@@ -11,7 +11,8 @@ public class GlobalExceptionHandler : IExceptionHandler
         httpContext.Response.StatusCode = exception switch
         {
             InvalidFieldException => (int)HttpStatusCode.BadRequest,
-            AuthenticationException => (int)HttpStatusCode.Unauthorized,
+            AuthenticationException or NotAuthenticatedException => (int)HttpStatusCode.Unauthorized,
+            AccountNoLongerExistsException => (int)HttpStatusCode.Forbidden,
             ResourceNotFoundException => (int)HttpStatusCode.NotFound,
             DuplicateResourceException => (int)HttpStatusCode.Conflict,
             ResourceCreationException => (int)HttpStatusCode.InternalServerError,

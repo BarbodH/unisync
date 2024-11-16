@@ -15,5 +15,5 @@ public interface IAccountRepository
 
     public int GetId(string email);
 
-    public Task<string> RefreshToken();
+    public int? VerifyId(string id);
 }

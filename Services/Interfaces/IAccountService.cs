@@ -8,5 +8,5 @@ public interface IAccountService
     
     public string Login(AccountLoginDto account);
 
-    public Task<string> RefreshToken();
+    public string RefreshToken(string? accountId);
 }

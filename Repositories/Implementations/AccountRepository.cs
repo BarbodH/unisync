@@ -89,8 +89,14 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
         return _dapper.QuerySingle<int>(sql, new { Email = email });
     }
 
-    public Task<string> RefreshToken()
+    public int? VerifyId(string id)
     {
-        throw new NotImplementedException();
+        var sql = @"
+            SELECT Id
+            FROM Auth.Account
+            WHERE Id = @Id
+        ";
+        
+        return _dapper.QuerySingleOrDefault<int?>(sql, new { Id = id });
     }
 }

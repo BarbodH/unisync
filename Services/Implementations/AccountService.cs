@@ -44,16 +44,19 @@ public class AccountService(AuthUtil authUtil, IAccountRepository accountReposit
     {
         var loginConfirmation = accountRepository.GetCredentials(account.Email);
         if (loginConfirmation == null) throw new AuthenticationException("email");
-        
+
         var passwordHash = authUtil.GetPasswordHash(account.Password, loginConfirmation.PasswordSalt);
         if (passwordHash.Where((t, index) => t != loginConfirmation.PasswordHash[index]).Any())
             throw new AuthenticationException("password");
-        
+
         return authUtil.CreateToken(accountRepository.GetId(account.Email));
     }
 
-    public Task<string> RefreshToken()
+    public string RefreshToken(string? accountId)
     {
-        throw new NotImplementedException();
+        if (accountId == null) throw new NotAuthenticatedException();
+        
+        return authUtil.CreateToken(accountRepository.VerifyId(accountId) ??
+                                    throw new AccountNoLongerExistsException(accountId));
     }
 }

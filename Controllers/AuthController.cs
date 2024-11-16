@@ -28,14 +28,12 @@ public class AuthController(IAccountService accountService) : ControllerBase
         });
     }
 
-    // [HttpGet("RefreshToken")]
-    // public string RefreshToken()
-    // {
-    //     string sqlRetrieveUserId = $@"
-    //             SELECT UserId
-    //             FROM TutorialAppSchema.Users
-    //             WHERE UserId = '{User.FindFirst("userId")?.Value}'";
-    //     int userId = _dapper.LoadDataSingle<int>(sqlRetrieveUserId);
-    //     return _authUtilities.CreateToken(userId);
-    // }
+    [HttpGet("RefreshToken")]
+    public IActionResult RefreshToken()
+    {
+        return Ok(new Dictionary<string, string>
+        {
+            { "token", accountService.RefreshToken(User.FindFirst("userId")?.Value) }
+        });
+    }
 }
