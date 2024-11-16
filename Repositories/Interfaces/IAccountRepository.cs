@@ -1,4 +1,5 @@
 using UniSyncApi.Dtos.Auth;
+using UniSyncApi.Models;
 
 namespace UniSyncApi.Repositories.Interfaces;
 
@@ -10,8 +11,9 @@ public interface IAccountRepository
 
     public int RegisterAccount(AccountRegistrationDto account);
 
+    public LoginConfirmation? GetCredentials(string email);
 
-    public Task<bool> Login(AccountLoginDto account);
+    public int GetId(string email);
 
     public Task<string> RefreshToken();
 }

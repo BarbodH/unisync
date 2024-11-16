@@ -9,7 +9,7 @@ namespace UniSyncApi.Services.Implementations;
 
 public class AccountService(AuthUtil authUtil, IAccountRepository accountRepository) : IAccountService
 {
-    public Task Register(AccountRegistrationDto account)
+    public void Register(AccountRegistrationDto account)
     {
         if (account.Password != account.PasswordConfirm)
         {
@@ -38,13 +38,18 @@ public class AccountService(AuthUtil authUtil, IAccountRepository accountReposit
         {
             throw new ResourceCreationException("account");
         }
-
-        return Task.CompletedTask;
     }
 
-    public Task<bool> Login(AccountLoginDto account)
+    public string Login(AccountLoginDto account)
     {
-        throw new NotImplementedException();
+        var loginConfirmation = accountRepository.GetCredentials(account.Email);
+        if (loginConfirmation == null) throw new AuthenticationException("email");
+        
+        var passwordHash = authUtil.GetPasswordHash(account.Password, loginConfirmation.PasswordSalt);
+        if (passwordHash.Where((t, index) => t != loginConfirmation.PasswordHash[index]).Any())
+            throw new AuthenticationException("password");
+        
+        return authUtil.CreateToken(accountRepository.GetId(account.Email));
     }
 
     public Task<string> RefreshToken()

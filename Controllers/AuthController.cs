@@ -18,46 +18,16 @@ public class AuthController(IAccountService accountService) : ControllerBase
         return Ok();
     }
 
-    // [AllowAnonymous]
-    // [HttpPost("Login")]
-    // public IActionResult Login(UserLoginDto user)
-    // {
-    //     // Verify if the email address is valid, i.e., user exists
-    //     string sqlCommand = $@"
-    //             SELECT
-    //                 PasswordHash,
-    //                 PasswordSalt
-    //             FROM TutorialAppSchema.Auth
-    //             WHERE Email = '{user.Email}'
-    //         ";
-    //
-    //     // In the case where no element is returned (invalid email), SQL will throw an exception
-    //     UserLoginConfirmationDto userLoginConfirmation = _dapper
-    //         .LoadDataSingle<UserLoginConfirmationDto>(sqlCommand);
-    //     if (userLoginConfirmation == null) throw new Exception("Invalid Email!");
-    //
-    //     // Verify the password
-    //     byte[] passwordHash = _authUtilities.GetPasswordHash(user.Password, userLoginConfirmation.PasswordSalt);
-    //     for (int index = 0; index < passwordHash.Length; index++)
-    //     {
-    //         if (passwordHash[index] != userLoginConfirmation.PasswordHash[index])
-    //             return StatusCode(401, "Invalid Password!");
-    //     }
-    //
-    //     // Retrieve the user ID from the database to be used as a claim in the JWT token
-    //     string sqlRetrieveUserId = $@"
-    //             SELECT userId
-    //             FROM TutorialAppSchema.Users
-    //             WHERE Email = '{user.Email}'
-    //         ";
-    //     int userId = _dapper.LoadDataSingle<int>(sqlRetrieveUserId);
-    //
-    //     return Ok(new Dictionary<string, string>
-    //     {
-    //         { "token", _authUtilities.CreateToken(userId) }
-    //     });
-    // }
-    //
+    [AllowAnonymous]
+    [HttpPost("Login")]
+    public IActionResult Login(AccountLoginDto account)
+    {
+        return Ok(new Dictionary<string, string>
+        {
+            { "token", accountService.Login(account) }
+        });
+    }
+
     // [HttpGet("RefreshToken")]
     // public string RefreshToken()
     // {

@@ -1,10 +1,9 @@
 using System.Data;
-using System.Security.Cryptography;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using UniSyncApi.Dtos.Auth;
+using UniSyncApi.Models;
 using UniSyncApi.Repositories.Interfaces;
-using UniSyncApi.Utilities;
 
 namespace UniSyncApi.Repositories.Implementations;
 
@@ -14,14 +13,14 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
 
     public bool DoesEmailExist(string email)
     {
-        var command = $"SELECT Email FROM Auth.Account WHERE Email = '{email}';";
-        var existingUsers = _dapper.Query<string>(command);
+        var sql = $"SELECT Email FROM Auth.Account WHERE Email = '{email}';";
+        var existingUsers = _dapper.Query<string>(sql);
         return existingUsers.Any();
     }
 
     public int RegisterCredentials(AccountRegistrationDto account, byte[] passwordHash, byte[] passwordSalt)
     {
-        string sqlCommand = @"
+        string sql = @"
                 INSERT INTO Auth.Credentials (
                     Email,
                     PasswordHash,
@@ -33,7 +32,7 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
                 );
             ";
 
-        return _dapper.Execute(sqlCommand, new
+        return _dapper.Execute(sql, new
         {
             Email = account.Email,
             PasswordHash = passwordHash,
@@ -43,7 +42,7 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
 
     public int RegisterAccount(AccountRegistrationDto account)
     {
-        var sqlUpdateUsers = @"
+        var sql = @"
                 INSERT INTO Auth.Account (
                     Role,
                     FirstName,
@@ -57,7 +56,7 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
                 );
             ";
 
-        return _dapper.Execute(sqlUpdateUsers, new
+        return _dapper.Execute(sql, new
         {
             account.Role,
             account.FirstName,
@@ -66,10 +65,28 @@ public class AccountRepository(IConfiguration config) : IAccountRepository
         });
     }
 
-
-    public Task<bool> Login(AccountLoginDto account)
+    public LoginConfirmation? GetCredentials(string email)
     {
-        throw new NotImplementedException();
+        var sql = @"
+            SELECT
+                PasswordHash,
+                PasswordSalt
+            FROM Auth.Credentials
+            WHERE Email = @Email
+        ";
+
+        return _dapper.QuerySingleOrDefault<LoginConfirmation>(sql, new { Email = email });
+    }
+
+    public int GetId(string email)
+    {
+        var sql = @"
+            SELECT Id
+            FROM Auth.Account
+            WHERE Email = @Email
+        ";
+
+        return _dapper.QuerySingle<int>(sql, new { Email = email });
     }
 
     public Task<string> RefreshToken()

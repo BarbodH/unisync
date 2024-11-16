@@ -1,3 +1,3 @@
 namespace UniSyncApi.Exceptions;
 
-public class AuthenticationException() : Exception("Invalid authentication credentials.");
+public class AuthenticationException(string field) : Exception($"Authentication failed due to invalid '{field}'.");
