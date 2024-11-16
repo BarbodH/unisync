@@ -1,5 +1,4 @@
 using UniSyncApi.Extensions;
-using UniSyncApi.Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +8,6 @@ builder.Services.AddControllers();
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
 builder.Services.RegiserUtils();
-
-builder.Services.AddSingleton<StudentRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -11,12 +11,14 @@ public static class ServiceRegistry
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IStudentService, StudentService>();
         return services;
     }
 
     public static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IStudentRepository, StudentRepository>();
         return services;
     }
 
