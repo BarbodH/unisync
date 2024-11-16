@@ -2,7 +2,7 @@ using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 
-namespace UniSyncApi.Repositories;
+namespace UniSyncApi.Repositories.Implementations;
 
 public class StudentRepository(IConfiguration config)
 {

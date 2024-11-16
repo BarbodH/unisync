@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UniSyncApi.Dtos;
-using UniSyncApi.Repositories;
+using UniSyncApi.Repositories.Implementations;
 
 namespace UniSyncApi.Controllers;
 
@@ -33,6 +33,6 @@ public class StudentController(StudentRepository studentRepository) : Controller
             return BadRequest(new { message = "Could not create student." });
         }
         
-        return Ok();
+        return Created();
     }
 }
