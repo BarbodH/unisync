@@ -8,13 +8,21 @@ public class GlobalExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
         CancellationToken cancellationToken)
     {
-        httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        httpContext.Response.StatusCode = exception switch
+        {
+            InvalidFieldException => (int)HttpStatusCode.BadRequest,
+            AuthenticationException => (int)HttpStatusCode.Unauthorized,
+            ResourceNotFoundException => (int)HttpStatusCode.NotFound,
+            DuplicateResourceException => (int)HttpStatusCode.Conflict,
+            ResourceCreationException => (int)HttpStatusCode.InternalServerError,
+            _ => (int)HttpStatusCode.InternalServerError
+        };
         httpContext.Response.ContentType = "application/json";
-
+        
         await httpContext.Response.WriteAsync(new ExceptionDetails
         {
             StatusCode = httpContext.Response.StatusCode,
-            Message = "Something went wrong on the server side."
+            Message = exception.Message
         }.ToString(), cancellationToken: cancellationToken);
 
         return true;
